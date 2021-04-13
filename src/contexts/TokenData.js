@@ -760,7 +760,7 @@ export function useTokenChartData(tokenAddress) {
 export function useTokenPriceData(tokenAddress, timeWindow, interval = 3600) {
   const [state, { updatePriceData }] = useTokenDataContext()
   const chartData = state?.[tokenAddress]?.[timeWindow]?.[interval]
-  const [latestBlock] = useLatestBlocks()
+  //const [latestBlock] = useLatestBlocks()
 
   useEffect(() => {
     const currentTime = dayjs.utc()
@@ -769,13 +769,13 @@ export function useTokenPriceData(tokenAddress, timeWindow, interval = 3600) {
       timeWindow === timeframeOptions.ALL_TIME ? 1605139200 : currentTime.subtract(1, windowSize).startOf('hour').unix()
 
     async function fetch() {
-      let data = await getIntervalTokenData(tokenAddress, startTime, interval, latestBlock)
+      let data = await getIntervalTokenData(tokenAddress, startTime, interval)
       updatePriceData(tokenAddress, data, timeWindow, interval)
     }
     if (!chartData) {
       fetch()
     }
-  }, [chartData, interval, timeWindow, tokenAddress, updatePriceData, latestBlock])
+  }, [chartData, interval, timeWindow, tokenAddress, updatePriceData])
 
   return chartData
 }

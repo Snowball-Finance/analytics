@@ -17,7 +17,6 @@ import SideNav from './components/SideNav'
 import AccountLookup from './pages/AccountLookup'
 import { OVERVIEW_TOKEN_BLACKLIST, PAIR_BLACKLIST } from './constants'
 import LocalLoader from './components/LocalLoader'
-import { useLatestBlocks } from './contexts/Application'
 
 const AppWrapper = styled.div`
   position: relative;
@@ -99,10 +98,9 @@ function App() {
 
   const globalData = useGlobalData()
   const globalChartData = useGlobalChartData()
-  const [latestBlock, headBlock] = useLatestBlocks()
 
   // show warning
-  const showWarning = headBlock && latestBlock ? headBlock - latestBlock > BLOCK_DIFFERENCE_THRESHOLD : false
+  const showWarning = false;
 
   return (
     <ApolloProvider client={client}>
@@ -110,12 +108,11 @@ function App() {
         {showWarning && (
           <WarningWrapper>
             <WarningBanner>
-              {`Warning: The data on this site has only synced to Avalanche block ${latestBlock} (out of ${headBlock}). Please check back soon.`}
+              {`Warning: The data on this site has only synced to Avalanche block. Please check back soon.`}
             </WarningBanner>
           </WarningWrapper>
         )}
-        {latestBlock &&
-        globalData &&
+        {globalData &&
         Object.keys(globalData).length > 0 &&
         globalChartData &&
         Object.keys(globalChartData).length > 0 ? (

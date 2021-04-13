@@ -3,8 +3,9 @@ import { timeframeOptions, SUPPORTED_LIST_URLS__NO_ENS } from '../constants'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import getTokenList from '../utils/tokenLists'
-import { healthClient } from '../apollo/client'
-import { SUBGRAPH_HEALTH } from '../apollo/queries'
+import { client } from '../apollo/client'
+import { LATEST_BLOCK_QUERY } from '../apollo/queries'
+
 dayjs.extend(utc)
 
 const UPDATE = 'UPDATE'
@@ -12,14 +13,14 @@ const UPDATE_TIMEFRAME = 'UPDATE_TIMEFRAME'
 const UPDATE_SESSION_START = 'UPDATE_SESSION_START'
 const UPDATED_SUPPORTED_TOKENS = 'UPDATED_SUPPORTED_TOKENS'
 const UPDATE_LATEST_BLOCK = 'UPDATE_LATEST_BLOCK'
-const UPDATE_HEAD_BLOCK = 'UPDATE_HEAD_BLOCK'
+const UPDATE_HAS_INDEXING_ERRORS = 'UPDATE_HAS_INDEXING_ERRORS'
 
 const SUPPORTED_TOKENS = 'SUPPORTED_TOKENS'
 const TIME_KEY = 'TIME_KEY'
 const CURRENCY = 'CURRENCY'
 const SESSION_START = 'SESSION_START'
 const LATEST_BLOCK = 'LATEST_BLOCK'
-const HEAD_BLOCK = 'HEAD_BLOCK'
+const HAS_INDEXING_ERRORS = 'HAS_INDEXING_ERRORS'
 
 const ApplicationContext = createContext()
 
@@ -59,11 +60,11 @@ function reducer(state, { type, payload }) {
       }
     }
 
-    case UPDATE_HEAD_BLOCK: {
-      const { block } = payload
+    case UPDATE_HAS_INDEXING_ERRORS: {
+      const { hasIndexingErrors } = payload
       return {
         ...state,
-        [HEAD_BLOCK]: block,
+        [HAS_INDEXING_ERRORS]: hasIndexingErrors,
       }
     }
 
@@ -135,11 +136,11 @@ export default function Provider({ children }) {
     })
   }, [])
 
-  const updateHeadBlock = useCallback((block) => {
+  const updateHasIndexingErrors = useCallback((indexingErrors) => {
     dispatch({
-      type: UPDATE_HEAD_BLOCK,
+      type: UPDATE_HAS_INDEXING_ERRORS,
       payload: {
-        block,
+        indexingErrors,
       },
     })
   }, [])
@@ -155,10 +156,10 @@ export default function Provider({ children }) {
             updateTimeframe,
             updateSupportedTokens,
             updateLatestBlock,
-            updateHeadBlock,
+            updateHasIndexingErrors
           },
         ],
-        [state, update, updateTimeframe, updateSessionStart, updateSupportedTokens, updateLatestBlock, updateHeadBlock]
+        [state, update, updateTimeframe, updateSessionStart, updateSupportedTokens, updateLatestBlock, updateHasIndexingErrors]
       )}
     >
       {children}
@@ -167,33 +168,30 @@ export default function Provider({ children }) {
 }
 
 export function useLatestBlocks() {
-  const [state, { updateLatestBlock, updateHeadBlock }] = useApplicationContext()
+  const [state, { updateLatestBlock, updateHasIndexingErrors }] = useApplicationContext()
 
   const latestBlock = state?.[LATEST_BLOCK]
-  const headBlock = state?.[HEAD_BLOCK]
+  const hasIndexingErrors = state?.[HAS_INDEXING_ERRORS]
 
   useEffect(() => {
     async function fetch() {
       try {
-        const res = await healthClient.query({
-          query: SUBGRAPH_HEALTH,
+        const res = await client.query({
+          query: LATEST_BLOCK_QUERY,
         })
-        const syncedBlock = res.data.indexingStatusForCurrentVersion.chains[0].latestBlock.number
-        const headBlock = res.data.indexingStatusForCurrentVersion.chains[0].chainHeadBlock.number
-        if (syncedBlock && headBlock) {
-          updateLatestBlock(syncedBlock)
-          updateHeadBlock(headBlock)
-        }
+        console.log(res.data._meta.block.number, res.data._meta.hasIndexingErrors)
+        updateLatestBlock(res.data._meta.block.number)
+        updateHasIndexingErrors(res.data._meta.hasIndexingErrors)
       } catch (e) {
-        console.log(e)
+        console.log('hey:', e)
       }
     }
     if (!latestBlock) {
       fetch()
     }
-  }, [latestBlock, updateHeadBlock, updateLatestBlock])
+  }, [latestBlock, updateLatestBlock, updateHasIndexingErrors])
 
-  return [latestBlock, headBlock]
+  return [latestBlock, hasIndexingErrors]
 }
 
 export function useCurrentCurrency() {

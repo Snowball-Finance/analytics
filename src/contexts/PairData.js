@@ -26,6 +26,7 @@ import {
   getMostRecentBlockSinceTimestamp,
 } from '../utils'
 import { timeframeOptions } from '../constants'
+import { useLatestBlocks } from './Application'
 import { updateNameData } from '../utils/data'
 
 const UPDATE = 'UPDATE'
@@ -520,6 +521,7 @@ export function Updater() {
 export function useHourlyRateData(pairAddress, timeWindow) {
   const [state, { updateHourlyData }] = usePairDataContext()
   const chartData = state?.[pairAddress]?.hourlyData?.[timeWindow]
+  const [latestBlock] = useLatestBlocks()
 
   useEffect(() => {
     const currentTime = dayjs.utc()
@@ -528,13 +530,13 @@ export function useHourlyRateData(pairAddress, timeWindow) {
       timeWindow === timeframeOptions.ALL_TIME ? 1589760000 : currentTime.subtract(1, windowSize).startOf('hour').unix()
 
     async function fetch() {
-      let data = await getHourlyRateData(pairAddress, startTime)
+      let data = await getHourlyRateData(pairAddress, startTime, latestBlock)
       updateHourlyData(pairAddress, data, timeWindow)
     }
     if (!chartData) {
       fetch()
     }
-  }, [chartData, timeWindow, pairAddress, updateHourlyData])
+  }, [chartData, timeWindow, pairAddress, updateHourlyData, latestBlock])
 
   return chartData
 }

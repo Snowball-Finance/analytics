@@ -27,7 +27,6 @@ import {
   getMostRecentBlockSinceTimestamp,
 } from '../utils'
 import { timeframeOptions } from '../constants'
-import { useLatestBlocks } from './Application'
 import { updateNameData } from '../utils/data'
 
 const UPDATE = 'UPDATE'
@@ -760,7 +759,6 @@ export function useTokenChartData(tokenAddress) {
 export function useTokenPriceData(tokenAddress, timeWindow, interval = 3600) {
   const [state, { updatePriceData }] = useTokenDataContext()
   const chartData = state?.[tokenAddress]?.[timeWindow]?.[interval]
-  //const [latestBlock] = useLatestBlocks()
 
   useEffect(() => {
     const currentTime = dayjs.utc()

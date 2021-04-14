@@ -442,8 +442,10 @@ export function useUserLiquidityChart(account) {
           return mostRecent
         })
 
+        console.log('relavantDayDatas:', relavantDayDatas.filter(r =>  r !== undefined))
+
         // now cycle through pair day datas, for each one find usd value = ownership[address] * reserveUSD
-        const dailyUSD = relavantDayDatas.reduce((totalUSD, dayData) => {
+        const dailyUSD = relavantDayDatas.filter(r =>  r !== undefined).reduce((totalUSD, dayData) => {
           return (totalUSD =
             totalUSD +
             (ownershipPerPair[dayData.pairAddress]

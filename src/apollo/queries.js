@@ -1,6 +1,7 @@
 import gql from 'graphql-tag'
 import { FACTORY_ADDRESS, BUNDLE_ID } from '../constants'
 
+<<<<<<< HEAD
 export const SUBGRAPH_HEALTH = gql`
   query health {
     indexingStatusForCurrentVersion(subgraphName: "dasconnor/pangolin-dex") {
@@ -14,6 +15,16 @@ export const SUBGRAPH_HEALTH = gql`
           number
         }
       }
+=======
+export const LATEST_BLOCK_QUERY = gql`
+  query block {
+    _meta {
+      block {
+        hash
+        number
+      }
+      hasIndexingErrors
+>>>>>>> comment-out-health-client
     }
   }
 `

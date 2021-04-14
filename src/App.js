@@ -92,17 +92,15 @@ const LayoutWrapper = ({ children, savedOpen, setSavedOpen }) => {
   )
 }
 
-const BLOCK_DIFFERENCE_THRESHOLD = 30
-
 function App() {
   const [savedOpen, setSavedOpen] = useState(false)
 
   const globalData = useGlobalData()
   const globalChartData = useGlobalChartData()
-  const [latestBlock, headBlock] = useLatestBlocks()
+  const [latestBlock, hasIndexingErrors] = useLatestBlocks()
 
   // show warning
-  const showWarning = headBlock && latestBlock ? headBlock - latestBlock > BLOCK_DIFFERENCE_THRESHOLD : false
+  const showWarning = hasIndexingErrors;
 
   return (
     <ApolloProvider client={client}>
@@ -110,11 +108,12 @@ function App() {
         {showWarning && (
           <WarningWrapper>
             <WarningBanner>
-              {`Warning: The data on this site has only synced to Avalanche block ${latestBlock} (out of ${headBlock}). Please check back soon.`}
+              {`Warning: The data on this site has indexing errors to Avalanche block ${latestBlock}. Please check back soon.`}
             </WarningBanner>
           </WarningWrapper>
         )}
-        {latestBlock &&
+        {
+        latestBlock &&
         globalData &&
         Object.keys(globalData).length > 0 &&
         globalChartData &&

@@ -186,7 +186,7 @@ export function useLatestBlocks() {
     }
   }, [latestBlock, updateLatestBlock, updateHasIndexingErrors])
 
-  return [latestBlock, hasIndexingErrors]
+  return [latestBlock, true]
 }
 
 export function useCurrentCurrency() {
